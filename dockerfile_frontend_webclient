@@ -1,0 +1,10 @@
+FROM node:lts-iron
+ENV NODE_ENV development
+WORKDIR /react-app
+#COPY ./frontend_webclient/public ./public
+#COPY ./frontend_webclient/src ./src
+COPY ./frontend_webclient/package.json .
+RUN npm install
+CMD ["npm","start"]
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
+
