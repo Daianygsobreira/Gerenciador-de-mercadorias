@@ -44,7 +44,7 @@ function MercadoriaForm({ mercadoria, onSave, onCancel }) {
             <input
               type="text"
               name="nome"
-              value={mercadoria.nome}
+              value={dadosFormulario.nome}
               onChange={handleChange}
               required
             />

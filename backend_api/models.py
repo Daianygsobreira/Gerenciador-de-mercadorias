@@ -3,13 +3,15 @@ from flask_sqlalchemy import SQLAlchemy
 db = SQLAlchemy()
 
 class Mercadoria(db.Model):
-    __tablename__ = 'mercadorias'  # Adicione isso se a tabela se chama 'mercadorias' no banco de dados
+    __tablename__ = 'mercadorias'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(255), nullable=False)
-    numero_registro = db.Column(db.String(255), nullable=False)  # Mudado de VARCHAR para String
+    numero_registro = db.Column(db.String(255), nullable=False)
     fabricante = db.Column(db.String(255), nullable=False)
     tipo = db.Column(db.String(255), nullable=False)
     descricao = db.Column(db.String(255), nullable=False)
+    deletado = db.Column(db.Boolean, default=False, nullable=False)
+
 
     def to_dict(self):
         return {

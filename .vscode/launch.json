@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Python backend_api Remote Attach",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}/backend_api",
+                    "remoteRoot": "/app"
+                }
+            ],
+            "justMyCode": true
+        }
+    ]
+}

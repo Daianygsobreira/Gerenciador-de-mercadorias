@@ -45,7 +45,7 @@ def setup_routes(app):
                 return jsonify({'message': 'Dados inválidos'}), 400
 
         else:  # GET
-            mercadorias = Mercadoria.query.all()
+            mercadorias = Mercadoria.query.filter(Mercadoria.deletado == False)
             return jsonify([mercadoria.to_dict() for mercadoria in mercadorias])
         
     @app.route('/mercadorias/<int:id>', methods=['PUT', 'DELETE'])
@@ -74,7 +74,8 @@ def setup_routes(app):
                 return jsonify({'message': 'Dados inválidos'}), 400
 
         elif request.method == 'DELETE':
-            db.session.delete(mercadoria)
+            mercadoria.deletado = True
+            db.session.add(mercadoria)
             db.session.commit()
             return jsonify({'message': 'Mercadoria excluída com sucesso'}), 200
 
@@ -113,7 +114,7 @@ def setup_routes(app):
                 )
             ).label('saidas')
         ).join(Mercadoria, Mercadoria.id == MovimentacoesEstoque.mercadoria_id
-        ).group_by(Mercadoria.nome).all()
+        ).group_by(Mercadoria.nome).filter(Mercadoria.deletado == False)
 
         # Transforma o resultado em uma lista de dicionários
         resultado = [
@@ -162,3 +163,34 @@ def setup_routes(app):
     def mercadoria_entradas(id):
         movimentacoes = MovimentacoesEstoque.query.filter(MovimentacoesEstoque.mercadoria_id == id, MovimentacoesEstoque.quantidade > 0)
         return jsonify([movimentacao.to_dict() for movimentacao in movimentacoes])
+
+    @app.route('/mercadorias/<int:id>/entradas', methods=['POST'])
+    def mercadoria_entradas_post(id):
+        data = request.get_json()
+        qtd=int(data['quantidade'])
+        
+        nova_movimentacao = MovimentacoesEstoque(
+            data_hora=datetime.now(),
+            mercadoria_id=id,
+            quantidade=qtd,
+            local=data['local']
+        )
+        db.session.add(nova_movimentacao)
+        db.session.commit()
+        return jsonify({'message': f'Movimentação de entrada registrada com sucesso'}), 201
+    
+
+    @app.route('/mercadorias/<int:id>/saidas', methods=['POST'])
+    def mercadoria_saidas_post(id):
+        data = request.get_json()
+        qtd=int(data['quantidade']) * -1
+        
+        nova_movimentacao = MovimentacoesEstoque(
+            data_hora=datetime.now(),
+            mercadoria_id=id,
+            quantidade=qtd,
+            local=data['local']
+        )
+        db.session.add(nova_movimentacao)
+        db.session.commit()
+        return jsonify({'message': f'Movimentação de saída registrada com sucesso'}), 201

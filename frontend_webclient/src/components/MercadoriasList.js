@@ -25,9 +25,16 @@ function MercadoriasList() {
       setMercadoriaEditando(mercadoria);
   };
   const handleDelete = (id) => {
-    // Implemente a lógica para deletar a mercadoria
-    console.log('Deletar mercadoria com id:', id);
-};
+    api.delete(`/mercadorias/${id}`)
+       .then(() => {
+           console.log('Mercadoria deletada com sucesso');
+           carregarMercadorias(); // Recarrega a lista para refletir a remoção
+       })
+       .catch(error => {
+           console.error('Erro ao deletar mercadoria:', error);
+       });
+  };
+  
 
   const handleSaveEdit = async (mercadoriaAtualizada) => {
     try {

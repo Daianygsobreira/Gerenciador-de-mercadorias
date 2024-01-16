@@ -39,10 +39,11 @@ def drop_create_data():
         for mes in range(1, 13):
             nReg = [1,3,4,9]
             nReg = nReg[(mes + merc.id) % len(nReg)]
-            nQtd = [1,-1,3,-5,10,20,7,-9,5,-8]
+            nQtd = [1,2,3,5,10,20,7,9,5,8]
             locals = ['Deposito A','Deposito B','Deposito C']
             for n in range(nReg):
-                qtd = nQtd[(mes + merc.id + n) % len(nQtd)]
+                qtd = nQtd[(mes + merc.id + n) % len(nQtd)] + n
+                qtd = qtd if n % 2 == 0 else qtd * -1
                 dia = (mes * merc.id * n) % 28 + 1
                 h = ((dia + abs(qtd)) * nReg ) % 13 + 8
                 m = (dia * nReg) % 60

@@ -75,7 +75,7 @@ const options = {
             anchor: 'end',
             align: 'top',
             formatter: (value, context) => {
-                return value; // ou qualquer outro formato que você desejar
+                return value; 
             }
         }
     },
