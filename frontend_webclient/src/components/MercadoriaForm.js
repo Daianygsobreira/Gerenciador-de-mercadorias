@@ -5,28 +5,35 @@ import MercadoriasList from '../components/MercadoriasList'; // Importe seu comp
 
 
 function MercadoriaForm({ mercadoria, onSave, onCancel }) {
+  const mercadoriaId = mercadoria.id || 0;
   const [dadosFormulario, setDadosFormulario] = useState({
     nome: mercadoria.nome || '',
-    numero_registro: mercadoria.numeroRegistro || '',
+    numero_registro: mercadoria.numero_registro || '',
     fabricante: mercadoria.fabricante || '',
     tipo: mercadoria.tipo || '',
     descricao: mercadoria.descricao || ''
   });
-
+  
   const [mensagem, setMensagem] = useState('');
-
+  
   const handleChange = (e) => {
     setDadosFormulario({ ...dadosFormulario, [e.target.name]: e.target.value });
   };
-
+  
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+    
     try {
-      const response = await api.post('/mercadorias', dadosFormulario);
-      console.log(response.data);
-      setMensagem('Mercadoria adicionada com sucesso!');
-      setTimeout(() => setMensagem(''), 5000); // Limpa a mensagem após 5 segundos
+      if (mercadoriaId) {
+        const response = await api.put(`/mercadorias/${mercadoriaId}`, dadosFormulario);
+        console.log(response.data);
+        setMensagem('Mercadoria editada com sucesso!');
+      } else {
+        const response = await api.post('/mercadorias', dadosFormulario);
+        console.log(response.data);
+        setMensagem('Mercadoria adicionada com sucesso!');
+      }
+      setTimeout(() => setMensagem(''), 5000);
       onSave(); // Chame onSave para informar ao componente pai que a operação foi concluída
     } catch (error) {
       console.error('Ocorreu um erro ao enviar os dados:', error);
@@ -55,7 +62,7 @@ function MercadoriaForm({ mercadoria, onSave, onCancel }) {
             <input
               type="text"
               name="numero_registro"
-              value={mercadoria.numero_registro}
+              value={dadosFormulario.numero_registro}
               onChange={handleChange}
               required
             />
@@ -66,7 +73,7 @@ function MercadoriaForm({ mercadoria, onSave, onCancel }) {
             <input
               type="text"
               name="fabricante"
-              value={mercadoria.fabricante}
+              value={dadosFormulario.fabricante}
               onChange={handleChange}
               required
             />
@@ -77,7 +84,7 @@ function MercadoriaForm({ mercadoria, onSave, onCancel }) {
             <input
               type="text"
               name="tipo"
-              value={mercadoria.tipo}
+              value={dadosFormulario.tipo}
               onChange={handleChange}
               required
             />
@@ -87,12 +94,12 @@ function MercadoriaForm({ mercadoria, onSave, onCancel }) {
             <label>Descrição:</label>
             <textarea
               name="descricao"
-              value={mercadoria.descricao}
+              value={dadosFormulario.descricao}
               onChange={handleChange}
               required
             />
           </div>
-          <button type="submit">Cadastrar Mercadoria</button>
+          <button type="submit">{mercadoriaId ? 'Salvar Mercadoria' : 'Inserir Nova Mercadoria'}</button>
           <button type="button" onClick={onCancel} style={{ marginLeft: '10px' }}>Cancelar</button>
            
         </form>

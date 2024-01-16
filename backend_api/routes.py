@@ -1,7 +1,8 @@
 from flask import jsonify, request
 from models import Mercadoria, MovimentacoesEstoque, db
 import utils
-from sqlalchemy import func, case 
+from sqlalchemy import func, case, extract
+
 from datetime import datetime
 
 def setup_routes(app):
@@ -68,6 +69,7 @@ def setup_routes(app):
                     mercadoria.tipo = data['tipo']
                 if 'descricao' in data:
                     mercadoria.descricao = data['descricao']
+                db.session.add(mercadoria)
                 db.session.commit()
                 return jsonify({'message': 'Mercadoria atualizada com sucesso'}), 200
             else:
@@ -94,7 +96,6 @@ def setup_routes(app):
         db.session.commit()
         tipo_movimentacao = 'entrada' if quantidade > 0 else 'saída'
         return jsonify({'message': f'Movimentação de {tipo_movimentacao} registrada com sucesso'}), 201
-    
 
     @app.route('/movimentacoes_estoque/resumo_mensal', methods=['GET'])
     def resumo_mensal_movimentacoes():
@@ -124,10 +125,37 @@ def setup_routes(app):
                 'saidas': r.saidas
             } for r in resumo
         ]
-
         return jsonify(resultado)
 
+    @app.route('/mercadorias/<int:id>/resumo_mensal', methods=['GET'])
+    def mercadoria_resumo_mensal_movimentacoes(id):
+        resumo = db.session.query(
+            extract('year', MovimentacoesEstoque.data_hora).label('ano'),
+            extract('month', MovimentacoesEstoque.data_hora).label('mes'),
+            Mercadoria.nome.label('nome_produto'),
+            func.sum(
+                case(
+                    (MovimentacoesEstoque.quantidade > 0, MovimentacoesEstoque.quantidade),
+                    else_=0
+                )
+            ).label('entradas'),
+            func.sum(
+                case(
+                    (MovimentacoesEstoque.quantidade < 0, -MovimentacoesEstoque.quantidade),
+                    else_=0
+                )
+            ).label('saidas')
+        ).join(Mercadoria, Mercadoria.id == MovimentacoesEstoque.mercadoria_id
+        ).group_by('ano', 'mes', Mercadoria.nome).filter(Mercadoria.deletado == False, Mercadoria.id == id)
 
+        resultado = [
+            {
+                'nome_produto': f'{str(r.mes).zfill(2)}/{r.ano}',
+                'entradas': r.entradas,
+                'saidas': r.saidas
+            } for r in resumo
+        ]
+        return jsonify(resultado)
 
     @app.route('/movimentacoes_estoque', methods=['GET'])
     def get_movimentacoes_estoque():

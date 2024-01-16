@@ -44,6 +44,7 @@ def drop_create_data():
             for n in range(nReg):
                 qtd = nQtd[(mes + merc.id + n) % len(nQtd)] + n
                 qtd = qtd if n % 2 == 0 else qtd * -1
+                qtd = -1 * abs(qtd) if mes in [6,7,10] and not n % 2 else qtd
                 dia = (mes * merc.id * n) % 28 + 1
                 h = ((dia + abs(qtd)) * nReg ) % 13 + 8
                 m = (dia * nReg) % 60
